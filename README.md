@@ -4,6 +4,14 @@
 
 完整源码位于 [`desktop/`](desktop/)，使用说明、功能差异与验证范围见 [desktop/README.md](desktop/README.md)。
 
+## 下载 Windows EXE
+
+[下载红果短剧SAF版 0.8.0（Windows x64）](https://github.com/zqzhuhai-commits/hongguo-saf-windows/releases/download/v0.8.0/SAF.-0.8.0-Windows-x64.exe) · [发布页面](https://github.com/zqzhuhai-commits/hongguo-saf-windows/releases/tag/v0.8.0)
+
+下载后双击 EXE。GitHub 附件会简化中文文件名，应用内名称仍为「红果短剧SAF版」。
+
+EXE 由本仓库源码在 Windows GitHub Actions 上构建，自动测试通过。校验文件随发布包提供。
+
 ## 从源码运行和构建
 
 安装 Node.js 22 或以上：
