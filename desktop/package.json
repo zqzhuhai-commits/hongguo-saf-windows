@@ -1,7 +1,7 @@
 {
   "name": "hongguotv-desktop",
-  "version": "0.8.0",
-  "description": "红果短剧SAF版 Windows 桌面客户端",
+  "version": "0.8.1",
+  "description": "红果短剧Win客户端SAF版 Windows 桌面客户端",
   "main": "main.mjs",
   "type": "module",
   "license": "GPL-3.0-only",
@@ -25,7 +25,7 @@
   },
   "build": {
     "appId": "com.hongguotv.desktop",
-    "productName": "红果短剧SAF版",
+    "productName": "红果短剧Win客户端SAF版",
     "asar": true,
     "directories": {
       "output": "../outputs/windows",
@@ -43,7 +43,8 @@
       "NOTICE.md",
       "licenses/**",
       "README.md",
-      "package.json"
+      "package.json",
+      "assets/**"
     ],
     "win": {
       "target": [
@@ -51,7 +52,8 @@
         "zip"
       ],
       "signAndEditExecutable": false,
-      "artifactName": "红果短剧SAF版-${version}-Windows-x64.${ext}"
+      "artifactName": "红果短剧Win客户端SAF版-${version}-Windows-x64.${ext}",
+      "icon": "build/app.ico"
     },
     "portable": {
       "requestExecutionLevel": "user",

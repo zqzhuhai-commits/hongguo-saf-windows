@@ -18,11 +18,11 @@ else {
   app.on('window-all-closed',()=>app.quit());
   app.on('before-quit',()=>media?.close());
   app.whenReady().then(async()=>{
-    app.setName('红果短剧SAF版');
+    app.setName('红果短剧Win客户端SAF版');
     library=new Library(app.getPath('userData'));
     media=await startMediaServer(provider);
     Menu.setApplicationMenu(null);
-    window=new BrowserWindow({width:1280,height:840,minWidth:940,minHeight:640,title:'红果短剧SAF版',backgroundColor:'#101218',autoHideMenuBar:true,
+    window=new BrowserWindow({width:1280,height:840,minWidth:940,minHeight:640,title:'红果短剧Win客户端SAF版',backgroundColor:'#101218',autoHideMenuBar:true,icon:path.join(here,'assets/app.png'),
       webPreferences:{preload:path.join(here,'preload.cjs'),nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
     const trusted=event=>event.sender===window?.webContents && event.senderFrame===window.webContents.mainFrame;
     const handle=(name,fn)=>ipcMain.handle(name,async(event,...args)=>{

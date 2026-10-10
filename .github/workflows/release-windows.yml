@@ -33,6 +33,9 @@ jobs:
         run: npx electron-builder --win portable --x64 --publish never
         env:
           ELECTRON_BUILDER_COMPRESSION_LEVEL: '5'
+      - name: Verify packaged icon and product name
+        working-directory: desktop
+        run: node verify-brand.cjs
       - name: Publish release
         shell: pwsh
         env:
@@ -44,11 +47,14 @@ jobs:
           $tag = "v$version"
           $exe = Get-ChildItem outputs/windows -Filter '*Windows-x64.exe' | Select-Object -First 1
           if (!$exe) { throw 'Windows EXE was not generated' }
+          $downloadName = "Hongguo-Win-SAF-$version-Windows-x64.exe"
+          Rename-Item -LiteralPath $exe.FullName -NewName $downloadName
+          $exe = Get-Item (Join-Path $exe.DirectoryName $downloadName)
           $checksum = "$($exe.FullName).sha256"
           "$((Get-FileHash $exe.FullName -Algorithm SHA256).Hash.ToLower())  $($exe.Name)" | Set-Content -Encoding utf8 $checksum
           gh release view $tag *> $null
           if ($LASTEXITCODE -ne 0) {
-            gh release create $tag --target $env:GITHUB_SHA --title "红果短剧SAF版 $version" --notes "Windows 10/11 x64 独立便携版，无需安卓模拟器。源码与构建说明见 desktop/README.md。自动测试通过；真实剧集播放及硬件解码仍需 Windows 实机验证。EXE 未配置 Authenticode 签名。"
+            gh release create $tag --target $env:GITHUB_SHA --title "红果短剧Win客户端SAF版 $version" --notes "Windows 10/11 x64 独立便携版，无需安卓模拟器。源码与构建说明见 desktop/README.md。自动测试通过；真实剧集播放及硬件解码仍需 Windows 实机验证。EXE 未配置 Authenticode 签名。"
             if ($LASTEXITCODE -ne 0) { throw 'Release creation failed' }
           }
           gh release upload $tag $exe.FullName $checksum --clobber
