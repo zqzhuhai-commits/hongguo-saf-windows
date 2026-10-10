@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {JSDOM} from 'jsdom';
-import {Library} from '../library.mjs';
+import {Library,defaults} from '../library.mjs';
 const html=fs.readFileSync(new URL('../ui/index.html',import.meta.url),'utf8');
 const script=fs.readFileSync(new URL('../ui/app.js',import.meta.url),'utf8');
 const series={id:'123',title:'测试故事 <script>alert(1)</script>',cover:'',description:'明确标记的界面测试夹具',badge:'全 2 集',tags:'测试'};
@@ -39,6 +39,20 @@ test('renderer escapes source titles and opens real detail/episode controls',asy
   const f=await fixture(t);assert.equal(f.d.querySelector('.card h3').textContent,series.title);assert.equal(f.d.querySelectorAll('#content script').length,0);
   await f.click('[data-action="detail"]');assert.equal(f.d.querySelector('.detail-info h2').textContent,series.title);assert.equal(f.d.querySelectorAll('#detail-content script').length,0);assert.equal(f.d.querySelectorAll('#detail-content [data-action="episode"]').length,2);
   await f.click('[data-action="close-detail"]');assert.equal(f.d.querySelector('#detail-dialog').open,false);
+});
+test('Mac boot metadata brands the UI and enables the native fullscreen shortcut',async t=>{
+  let fullscreen=0;
+  const name='红果短剧Mac客户端SAF版';
+  const f=await fixture(t,{boot:async()=>({library:defaults(),version:'0.8.1',appName:name,platform:'darwin'}),fullscreen:async()=>{fullscreen++;return true;}});
+  assert.equal(f.d.title,name);
+  assert.equal(f.d.querySelector('#app-name').textContent,name);
+  assert.equal(f.d.querySelector('#footer-brand').textContent,name);
+  assert.equal(f.d.querySelector('#platform-name').textContent,'MAC DESKTOP');
+  await f.click('[data-nav="settings"]');
+  assert.ok(f.d.querySelector('.notice-box').textContent.includes(name+' 0.8.1'));
+  f.d.dispatchEvent(new f.w.KeyboardEvent('keydown',{key:'f',metaKey:true,ctrlKey:true,bubbles:true}));
+  await settle();
+  assert.equal(fullscreen,1);
 });
 test('favorites update in place, persist and remain removable from the collection',async t=>{
   const f=await fixture(t);await f.click('.card [data-action="favorite"]');assert.equal(f.library.value.favorites.length,1);assert.equal(f.d.querySelector('#favorite-count').textContent,'1');

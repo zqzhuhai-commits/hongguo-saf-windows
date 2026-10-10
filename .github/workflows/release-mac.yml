@@ -1,0 +1,90 @@
+name: Publish Mac app
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/release-mac.yml]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: mac-release
+  cancel-in-progress: false
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Prepare draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          version=$(node -p "require('./desktop/package.json').version")
+          tag="mac-v$version"
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            gh release create "$tag" --draft --target "$GITHUB_SHA" --title "红果短剧Mac客户端SAF版 $version" --notes "独立 macOS 应用，提供 Apple 芯片 arm64 和 Intel x64 安装包。沿用用户提供的应用图标。采用本地 ad-hoc 签名，未配置 Apple Developer ID 或 Apple 公证。真实剧集播放及硬件解码仍需目标设备验证。安装及构建说明见 desktop/README-Mac.md。"
+          fi
+  build:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-15
+          - arch: x64
+            runner: macos-15-intel
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - name: Install dependencies
+        working-directory: desktop
+        run: npm ci
+      - name: Test
+        working-directory: desktop
+        run: npm test
+      - name: Build Mac packages
+        working-directory: desktop
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npx electron-builder --config electron-builder.mac.cjs --mac dmg zip --${{ matrix.arch }} --publish never
+      - name: Verify Mac package and launch app
+        working-directory: desktop
+        run: python3 verify-mac.py ${{ matrix.arch }}
+      - name: Upload packages and verification
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          version=$(node -p "require('./desktop/package.json').version")
+          tag="mac-v$version"
+          cd outputs/macos
+          for package in *-${{ matrix.arch }}.dmg *-${{ matrix.arch }}.zip; do
+            shasum -a 256 "$package" > "$package.sha256"
+            gh release upload "$tag" "$package" "$package.sha256" --clobber
+          done
+          gh release upload "$tag" "../../mac-smoke-${{ matrix.arch }}.json" --clobber
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Publish verified release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          version=$(node -p "require('./desktop/package.json').version")
+          gh release edit "mac-v$version" --draft=false --latest=false

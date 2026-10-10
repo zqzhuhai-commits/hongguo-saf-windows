@@ -11,6 +11,7 @@ const here=path.dirname(fileURLToPath(import.meta.url));
 const dataDirectory=path.join(app.getPath('appData'),'HongguoTV');
 fs.mkdirSync(dataDirectory,{recursive:true});
 app.setPath('userData',dataDirectory);
+const appName=process.platform==='darwin'?'红果短剧Mac客户端SAF版':'红果短剧Win客户端SAF版';
 let window,media,library;
 if(!app.requestSingleInstanceLock()) app.quit();
 else {
@@ -18,18 +19,18 @@ else {
   app.on('window-all-closed',()=>app.quit());
   app.on('before-quit',()=>media?.close());
   app.whenReady().then(async()=>{
-    app.setName('红果短剧Win客户端SAF版');
+    app.setName(appName);
     library=new Library(app.getPath('userData'));
     media=await startMediaServer(provider);
-    Menu.setApplicationMenu(null);
-    window=new BrowserWindow({width:1280,height:840,minWidth:940,minHeight:640,title:'红果短剧Win客户端SAF版',backgroundColor:'#101218',autoHideMenuBar:true,icon:path.join(here,'assets/app.png'),
+    Menu.setApplicationMenu(process.platform==='darwin'?Menu.buildFromTemplate([{role:'appMenu'},{role:'editMenu'},{label:'显示',submenu:[{label:'全屏',accelerator:'Control+Command+F',click:()=>window?.setFullScreen(!window.isFullScreen())}]}]):null);
+    window=new BrowserWindow({width:1280,height:840,minWidth:940,minHeight:640,title:appName,backgroundColor:'#101218',autoHideMenuBar:true,icon:path.join(here,'assets/app.png'),
       webPreferences:{preload:path.join(here,'preload.cjs'),nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
     const trusted=event=>event.sender===window?.webContents && event.senderFrame===window.webContents.mainFrame;
     const handle=(name,fn)=>ipcMain.handle(name,async(event,...args)=>{
       if(!trusted(event))throw new Error('无效请求');
       try{return {ok:true,value:await fn(...args)};}catch(e){return {ok:false,error:knownMessage(e)};}
     });
-    handle('desktop:boot',()=>({library:library.value,version:app.getVersion(),loadError:library.loadError || ''}));
+    handle('desktop:boot',()=>({library:library.value,version:app.getVersion(),appName,platform:process.platform,loadError:library.loadError || ''}));
     let pending=0;
     handle('desktop:catalog',async({mode,page,query,type})=>{
       if(!['home','ranking','search'].includes(mode) || !Number.isInteger(page) || page<1 || page>100 || !['short','comic'].includes(type))throw new Error('列表参数无效');
@@ -72,6 +73,18 @@ else {
     window.webContents.on('will-navigate',event=>event.preventDefault());
     window.webContents.session.setPermissionRequestHandler((_webContents,_permission,callback)=>callback(false));
     await window.loadFile(path.join(here,'ui/index.html'));
+    if(process.argv.includes('--smoke-test') && process.env.HONGGUO_SMOKE_OUTPUT) {
+      const deadline=Date.now()+15000;
+      let title='';
+      while(Date.now()<deadline) {
+        title=await window.webContents.executeJavaScript('document.title');
+        if(title===appName)break;
+        await new Promise(resolve=>setTimeout(resolve,100));
+      }
+      if(title!==appName)throw new Error('Platform title did not initialize');
+      fs.writeFileSync(process.env.HONGGUO_SMOKE_OUTPUT,JSON.stringify({name:appName,title,platform:process.platform,arch:process.arch,version:app.getVersion(),passed:true}));
+      app.quit();
+    }
   }).catch(()=>{dialog.showErrorBox('启动失败','桌面版无法启动，请确认文件完整且用户目录可写。');app.quit();});
 }
 function knownMessage(error) {
