@@ -1,4 +1,4 @@
-# 红果短剧SAF版
+# 红果短剧Win客户端SAF版
 
 独立 Windows 桌面客户端，适用于 Windows 10 / 11 x64，无需安卓模拟器。
 
@@ -6,9 +6,9 @@
 
 ## 下载 Windows EXE
 
-[下载红果短剧SAF版 0.8.0（Windows x64）](https://github.com/zqzhuhai-commits/hongguo-saf-windows/releases/download/v0.8.0/SAF.-0.8.0-Windows-x64.exe) · [发布页面](https://github.com/zqzhuhai-commits/hongguo-saf-windows/releases/tag/v0.8.0)
+[下载红果短剧Win客户端SAF版 0.8.1（Windows x64）](https://github.com/zqzhuhai-commits/hongguo-saf-windows/releases/download/v0.8.1/Hongguo-Win-SAF-0.8.1-Windows-x64.exe) · [发布页面](https://github.com/zqzhuhai-commits/hongguo-saf-windows/releases/tag/v0.8.1)
 
-下载后双击 EXE。GitHub 附件会简化中文文件名，应用内名称仍为「红果短剧SAF版」。
+下载后双击 EXE。下载附件采用便于链接使用的英文文件名，应用内名称仍为「红果短剧Win客户端SAF版」。
 
 EXE 由本仓库源码在 Windows GitHub Actions 上构建，自动测试通过。校验文件随发布包提供。
 
