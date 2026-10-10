@@ -1,0 +1,63 @@
+{
+  "name": "hongguotv-desktop",
+  "version": "0.8.0",
+  "description": "红果短剧SAF版 Windows 桌面客户端",
+  "main": "main.mjs",
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "author": "hongguoTV contributors",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test tests/*.test.mjs",
+    "probe": "node probe.mjs",
+    "build:win": "electron-builder --win portable zip --x64 --publish never"
+  },
+  "dependencies": {
+    "axios": "1.13.6",
+    "cheerio": "1.2.0",
+    "sm-crypto": "0.3.13"
+  },
+  "devDependencies": {
+    "electron": "44.7.0",
+    "electron-builder": "26.15.3",
+    "jsdom": "^27.0.1",
+    "resedit": "1.7.2"
+  },
+  "build": {
+    "appId": "com.hongguotv.desktop",
+    "productName": "红果短剧SAF版",
+    "asar": true,
+    "directories": {
+      "output": "../outputs/windows",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.mjs",
+      "preload.cjs",
+      "provider.mjs",
+      "media.mjs",
+      "library.mjs",
+      "ui/**",
+      "vendor/**",
+      "LICENSE",
+      "NOTICE.md",
+      "licenses/**",
+      "README.md",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "portable",
+        "zip"
+      ],
+      "signAndEditExecutable": false,
+      "artifactName": "红果短剧SAF版-${version}-Windows-x64.${ext}"
+    },
+    "portable": {
+      "requestExecutionLevel": "user",
+      "unicode": true
+    },
+    "publish": null,
+    "afterPack": "after-pack.cjs"
+  }
+}

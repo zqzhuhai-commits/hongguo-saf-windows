@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-10T08:06:55.119Z",
+  "checks": [
+    {
+      "name": "comic:home",
+      "ok": false,
+      "error": "ERR_BAD_RESPONSE"
+    },
+    {
+      "name": "short:home",
+      "ok": false,
+      "error": "ERR_BAD_RESPONSE"
+    }
+  ],
+  "automatedTests": {
+    "node": {
+      "passed": 17,
+      "failed": 0
+    },
+    "electronRuntimeCore": {
+      "passed": 10,
+      "failed": 0
+    },
+    "renderer": "DOM fixture tests; actual video decoding and Windows GUI not tested"
+  },
+  "windowsLivePlayback": "not verified",
+  "applicationName": "红果短剧SAF版",
+  "renameVerification": {
+    "date": "2026-10-10",
+    "regressionTestsPassed": 17,
+    "previousDataDirectoryPreserved": true
+  }
+}
